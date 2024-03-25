@@ -6,12 +6,12 @@
 <div align="center">
 
 [![Buy Me Coffee Badge](https://img.shields.io/badge/-Buy_Me_a_Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=535353)](https://www.buymeacoffee.com/abdurrohmaj)
-[![Intagram Badge](https://img.shields.io/badge/intagram-F3F3F3?style=for-the-badge&logo=instagram&logoColor=d62976)](https://www.instagram.com/abdur_rohman.dev/)
+[![Instagram Badge](https://img.shields.io/badge/instagram-F3F3F3?style=for-the-badge&logo=instagram&logoColor=d62976)](https://www.instagram.com/abdur_rohman.dev/)
 [![Linkedin Badge](https://img.shields.io/badge/linkedin-0a66c2?style=for-the-badge&logo=linkedin&logoColor=ffffff)](https://www.linkedin.com/in/abdur-rohman-dev/)
 
 </div>
 
-Adaptive will pop a custom will pop scope widget to allow apple user back with apple back gesture
+Adaptive will pop a custom will pop scope widget to allow apple user backs with apple back gesture
 
 > Currently will pop scope widget will disabled the back gesture for apple user, you can find out the issue on this link https://github.com/flutter/flutter/issues/14203
 
