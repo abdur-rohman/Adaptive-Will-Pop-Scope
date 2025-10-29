@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class AdaptiveWillPopScope extends StatefulWidget {
-  /// The shwon widget (can be swiped if user used the apple device)
+  /// The shown widget (can be swiped if user used the Apple device)
   final Widget child;
 
   /// Callback when tried to navigate back to previous page, it will be popped if the return was [true]
@@ -12,12 +12,12 @@ class AdaptiveWillPopScope extends StatefulWidget {
   final double? swipeThreshold;
 
   const AdaptiveWillPopScope({
-    Key? key,
+    super.key,
     this.swipeWidth,
     this.swipeThreshold,
     this.onWillPop,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   State<AdaptiveWillPopScope> createState() => _AdaptiveWillPopScopeState();
@@ -27,12 +27,17 @@ class _AdaptiveWillPopScopeState extends State<AdaptiveWillPopScope>
     with SingleTickerProviderStateMixin {
   late final _marginLeftNotifier = ValueNotifier(0.0);
 
+  double? _startDx;
+  double? _startDy;
+  bool _isSwiping = false;
+
   bool get _isApple => Platform.isMacOS || Platform.isIOS;
 
   double get _currentMarginLeft => _marginLeftNotifier.value;
   double get _swipeWidth =>
       widget.swipeWidth ?? MediaQuery.of(context).size.width;
-  double get _swipeThreshold => widget.swipeThreshold ?? (_swipeWidth / 2);
+  double get _swipeThreshold => widget.swipeThreshold ?? (_swipeWidth / 3);
+  double get _swipeStartArea => 50.0;
 
   @override
   void dispose() {
@@ -44,25 +49,45 @@ class _AdaptiveWillPopScopeState extends State<AdaptiveWillPopScope>
   Widget build(BuildContext context) => _isApple && widget.onWillPop != null
       ? GestureDetector(
           onHorizontalDragUpdate: (details) {
-            final isSwipedRight = (details.primaryDelta ?? 0) > 0;
-            final isSwiped = _currentMarginLeft > 0;
-            if (isSwipedRight) {
-              _marginLeftNotifier.value = details.globalPosition.dx;
-            } else if (isSwiped) {
-              _marginLeftNotifier.value = details.globalPosition.dx;
+            if (!_isSwiping || _startDx == null || _startDy == null) return;
+
+            final dx = details.globalPosition.dx - _startDx!;
+            final dy = details.globalPosition.dy - _startDy!;
+
+            if (dx.abs() > dy.abs() * 1.75) {
+              final isSwipedRight = dx > 0;
+              final isSwiped = _currentMarginLeft > 0;
+              if (isSwipedRight) {
+                _marginLeftNotifier.value = dx;
+              } else if (isSwiped) {
+                _marginLeftNotifier.value = dx;
+              }
+            }
+          },
+          onHorizontalDragStart: (details) {
+            final touchX = details.globalPosition.dx;
+            if (touchX <= _swipeStartArea) {
+              _startDx = touchX;
+              _startDy = details.globalPosition.dy;
+              _isSwiping = true;
             }
           },
           onHorizontalDragDown: (_) {
+            _isSwiping = false;
             _marginLeftNotifier.value = 0;
           },
           onHorizontalDragCancel: () {
+            _isSwiping = false;
             _marginLeftNotifier.value = 0;
           },
           onHorizontalDragEnd: (_) {
-            final isThresholdExcedeed = _currentMarginLeft >= _swipeThreshold;
-            if (isThresholdExcedeed) {
+            if (!_isSwiping) return;
+            _isSwiping = false;
+
+            final isThresholdExceeded = _currentMarginLeft >= _swipeThreshold;
+            if (isThresholdExceeded) {
               widget.onWillPop?.call().then((canBack) {
-                if (canBack) Navigator.pop(context);
+                if (canBack && context.mounted) Navigator.pop(context);
               }).whenComplete(() => _marginLeftNotifier.value = 0);
             } else {
               _marginLeftNotifier.value = 0;
@@ -71,7 +96,7 @@ class _AdaptiveWillPopScopeState extends State<AdaptiveWillPopScope>
           child: ValueListenableBuilder<double>(
             valueListenable: _marginLeftNotifier,
             builder: (_, margin, __) => AnimatedSlide(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 200),
               offset: Offset(margin / _swipeWidth, 0),
               child: widget.child,
             ),
