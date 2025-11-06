@@ -46,61 +46,67 @@ class _AdaptiveWillPopScopeState extends State<AdaptiveWillPopScope>
   }
 
   @override
-  Widget build(BuildContext context) => _isApple && widget.onWillPop != null
-      ? GestureDetector(
-          onHorizontalDragUpdate: (details) {
-            if (!_isSwiping || _startDx == null || _startDy == null) return;
+  Widget build(BuildContext context) => WillPopScope(
+        onWillPop: widget.onWillPop,
+        child: _isApple && widget.onWillPop != null
+            ? GestureDetector(
+                onHorizontalDragUpdate: (details) {
+                  if (!_isSwiping || _startDx == null || _startDy == null) {
+                    return;
+                  }
 
-            final dx = details.globalPosition.dx - _startDx!;
-            final dy = details.globalPosition.dy - _startDy!;
+                  final dx = details.globalPosition.dx - _startDx!;
+                  final dy = details.globalPosition.dy - _startDy!;
 
-            if (dx.abs() > dy.abs() * 1.75) {
-              final isSwipedRight = dx > 0;
-              final isSwiped = _currentMarginLeft > 0;
-              if (isSwipedRight) {
-                _marginLeftNotifier.value = dx;
-              } else if (isSwiped) {
-                _marginLeftNotifier.value = dx;
-              }
-            }
-          },
-          onHorizontalDragStart: (details) {
-            final touchX = details.globalPosition.dx;
-            if (touchX <= _swipeStartArea) {
-              _startDx = touchX;
-              _startDy = details.globalPosition.dy;
-              _isSwiping = true;
-            }
-          },
-          onHorizontalDragDown: (_) {
-            _isSwiping = false;
-            _marginLeftNotifier.value = 0;
-          },
-          onHorizontalDragCancel: () {
-            _isSwiping = false;
-            _marginLeftNotifier.value = 0;
-          },
-          onHorizontalDragEnd: (_) {
-            if (!_isSwiping) return;
-            _isSwiping = false;
+                  if (dx.abs() > dy.abs() * 1.75) {
+                    final isSwipedRight = dx > 0;
+                    final isSwiped = _currentMarginLeft > 0;
+                    if (isSwipedRight) {
+                      _marginLeftNotifier.value = dx;
+                    } else if (isSwiped) {
+                      _marginLeftNotifier.value = dx;
+                    }
+                  }
+                },
+                onHorizontalDragStart: (details) {
+                  final touchX = details.globalPosition.dx;
+                  if (touchX <= _swipeStartArea) {
+                    _startDx = touchX;
+                    _startDy = details.globalPosition.dy;
+                    _isSwiping = true;
+                  }
+                },
+                onHorizontalDragDown: (_) {
+                  _isSwiping = false;
+                  _marginLeftNotifier.value = 0;
+                },
+                onHorizontalDragCancel: () {
+                  _isSwiping = false;
+                  _marginLeftNotifier.value = 0;
+                },
+                onHorizontalDragEnd: (_) {
+                  if (!_isSwiping) return;
+                  _isSwiping = false;
 
-            final isThresholdExceeded = _currentMarginLeft >= _swipeThreshold;
-            if (isThresholdExceeded) {
-              widget.onWillPop?.call().then((canBack) {
-                if (canBack && context.mounted) Navigator.pop(context);
-              }).whenComplete(() => _marginLeftNotifier.value = 0);
-            } else {
-              _marginLeftNotifier.value = 0;
-            }
-          },
-          child: ValueListenableBuilder<double>(
-            valueListenable: _marginLeftNotifier,
-            builder: (_, margin, __) => AnimatedSlide(
-              duration: const Duration(milliseconds: 200),
-              offset: Offset(margin / _swipeWidth, 0),
-              child: widget.child,
-            ),
-          ),
-        )
-      : WillPopScope(onWillPop: widget.onWillPop, child: widget.child);
+                  final isThresholdExceeded =
+                      _currentMarginLeft >= _swipeThreshold;
+                  if (isThresholdExceeded) {
+                    widget.onWillPop?.call().then((canBack) {
+                      if (canBack && context.mounted) Navigator.pop(context);
+                    }).whenComplete(() => _marginLeftNotifier.value = 0);
+                  } else {
+                    _marginLeftNotifier.value = 0;
+                  }
+                },
+                child: ValueListenableBuilder<double>(
+                  valueListenable: _marginLeftNotifier,
+                  builder: (_, margin, __) => AnimatedSlide(
+                    duration: const Duration(milliseconds: 200),
+                    offset: Offset(margin / _swipeWidth, 0),
+                    child: widget.child,
+                  ),
+                ),
+              )
+            : widget.child,
+      );
 }

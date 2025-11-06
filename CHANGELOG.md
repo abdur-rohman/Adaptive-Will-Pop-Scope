@@ -1,3 +1,8 @@
+## 1.0.3
+
+- Fix Apple devices can still use the swipe back gesture
+- Update Example project to match the latest package version
+
 ## 1.0.2
 
 - [#1](https://github.com/abdur-rohman/Adaptive-Pop-Scope/pull/1): Align back-swipe behavior with iOS native gestures 2.17.0
