@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:adaptive_will_pop_scope/adaptive_will_pop_scope.dart';
+import 'package:adaptive_will_pop_scope/widget.dart';
 
 class SecondPage extends StatefulWidget {
   const SecondPage({super.key});
